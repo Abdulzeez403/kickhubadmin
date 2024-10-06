@@ -4,8 +4,9 @@
     // Example of disabling a specific rule
     "react/react-in-jsx-scope": "off", // Disable if you don't want to import React in every file
     // You can add more rules to disable or customize as needed
-    "no-console": "warn", // Warn for console.log statements instead of throwing an error
-    "react/prop-types": "off" // Disable prop-types validation if using TypeScript
+    "react/prop-types": "off", // Disable prop-types validation if using TypeScript
+
+    "@typescript-eslint/no-unused-vars": "off"
   },
   "settings": {
     "react": {
