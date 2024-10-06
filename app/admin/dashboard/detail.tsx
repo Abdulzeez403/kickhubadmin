@@ -10,25 +10,25 @@ export const HomePage = () => {
       <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-4 gap-4">
         <CustomCard
           title="Revenue"
-          total="₦28,125"
+          total={1000}
           // icon={FaDollarSign}
           subtitle="Total sales this month"
         />
         <CustomCard
           title="Orders"
-          total="312"
+          total={312}
           subtitle="Orders completed this month"
         />
 
         <CustomCard
           title="Orders"
-          total="312"
+          total={312}
           subtitle="Orders completed this month"
         />
 
         <CustomCard
           title="Products"
-          total="312"
+          total={312}
           subtitle="Total Product in the store"
         />
       </div>
