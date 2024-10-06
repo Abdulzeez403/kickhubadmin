@@ -30,7 +30,7 @@ const ProductForm = () => {
 
   const handleFileChange = (
     e: React.ChangeEvent<HTMLInputElement>,
-    setFieldValue: (field: string, value: any) => void
+    setFieldValue: (field: string, value: File[]) => void
   ) => {
     const files = e.target.files ? Array.from(e.target.files) : [];
     setFieldValue("images", files);

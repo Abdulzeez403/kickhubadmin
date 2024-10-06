@@ -80,7 +80,7 @@ export function TableComponent<TData, TValue>({
               value={
                 (table.getColumn("name")?.getFilterValue() as string) ?? ""
               }
-              onChange={(event: any) =>
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
                 table.getColumn("name")?.setFilterValue(event.target.value)
               }
               className="max-w-sm"
@@ -98,9 +98,9 @@ export function TableComponent<TData, TValue>({
 
       <Table className="border-2 rounded-lg">
         <TableHeader className="bg-slate-300">
-          {table.getHeaderGroups().map((headerGroup: any) => (
+          {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header: any) => (
+              {headerGroup.headers.map((header) => (
                 <TableHead key={header.id} className="text-white font-bold p-2">
                   {header.isPlaceholder
                     ? null
@@ -115,9 +115,9 @@ export function TableComponent<TData, TValue>({
         </TableHeader>
         <TableBody className="border-2 border-slate-300">
           {table.getRowModel().rows.length > 0 ? (
-            table.getRowModel().rows.map((row: any) => (
+            table.getRowModel().rows.map((row) => (
               <TableRow key={row.id}>
-                {row.getVisibleCells().map((cell: any) => (
+                {row.getVisibleCells().map((cell) => (
                   <TableCell key={cell.id}>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>

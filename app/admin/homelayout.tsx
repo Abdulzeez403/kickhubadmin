@@ -3,7 +3,6 @@ import React, { useState } from "react";
 import Link from "next/link";
 import {
   LayoutDashboard,
-  Users,
   LogOut,
   AlignJustify,
   ChartColumnBig,
@@ -11,6 +10,7 @@ import {
   BadgeDollarSign,
   BaggageClaim,
   PackageOpen,
+  LucideIcon,
 } from "lucide-react";
 
 import Image from "next/image";
@@ -27,7 +27,7 @@ interface IProp {
 
 interface NavLinkProps {
   href: string;
-  icon: any;
+  icon?: LucideIcon;
   children: React.ReactNode;
 }
 

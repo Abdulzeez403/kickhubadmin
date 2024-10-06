@@ -21,9 +21,11 @@ export const ProductDetail = () => {
         const { data, error } = await supabase.from("products").select("*");
         if (error) throw error;
         setProducts(data as ProductCardProps[]);
-      } catch (error: any) {
-        setError(error.message);
-        console.error("Error fetching products:", error.message);
+      } catch (error) {
+        if (error instanceof Error) {
+          setError(error.message);
+          console.error("Error fetching products:", error.message);
+        }
       } finally {
         setLoading(false);
       }
@@ -33,11 +35,11 @@ export const ProductDetail = () => {
   }, []);
 
   // Handlers for Drawer and actions
-  const handleUpdate = (value: ProductCardProps) => {
+  const handleUpdate = () => {
     setIsDrawerOpen(true); // open drawer for update
   };
 
-  const handleDelete = (value: ProductCardProps) => {
+  const handleDelete = () => {
     alert("Deleted Successfully!");
     // Implement deletion logic here if necessary
   };
