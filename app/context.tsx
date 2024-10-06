@@ -71,8 +71,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
       router.push("/admin");
       console.log("login successfully");
-    } catch (error: any) {
-      console.error("Error during sign-in:", error.message);
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error("Error during sign-in:", error.message);
+      } else {
+        console.error("Unexpected error during sign-in:", error);
+      }
     } finally {
       setLoading(false);
     }
