@@ -1,0 +1,144 @@
+import React from "react";
+import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableHeader,
+  TableRow,
+  TableHead,
+  TableBody,
+  TableCell,
+} from "@/components/ui/table";
+import {
+  ColumnDef,
+  ColumnFiltersState,
+  SortingState,
+  VisibilityState,
+  flexRender,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
+import { DataTablePagination } from "@/app/(components)/table/pagination";
+import { DataTableViewOptions } from "@/app/(components)/table/filter";
+import { ProductCardProps } from "../modal";
+import Drawer from "@/app/(components)/modals/drawer";
+import { Button } from "@/components/ui/button";
+
+interface DataTableProps<TData, TValue> {
+  columns: ColumnDef<TData, TValue>[];
+  data: TData[];
+  onEdit: (value: ProductCardProps) => void;
+  onDelete: (value: ProductCardProps) => void;
+  onDismiss: () => void;
+  onView: (value: ProductCardProps) => void;
+  children: React.ReactNode;
+  isOpen: boolean;
+  handleDrawerOpen: () => void;
+}
+
+export function TableComponent<TData, TValue>({
+  columns,
+  data,
+  children,
+  isOpen,
+  onDismiss,
+  handleDrawerOpen,
+}: DataTableProps<TData, TValue>) {
+  const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
+    []
+  );
+  const [columnVisibility, setColumnVisibility] =
+    React.useState<VisibilityState>({});
+
+  const table = useReactTable({
+    data,
+    columns,
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    onColumnVisibilityChange: setColumnVisibility,
+    state: {
+      sorting,
+      columnFilters,
+      columnVisibility,
+    },
+  });
+
+  return (
+    <div className="border-2 rounded-lg p-4">
+      <div className="flex justify-between items-center ">
+        <div className="flex items-center gap-x-2">
+          <div className="flex items-center py-4">
+            <Input
+              placeholder="Search name"
+              value={
+                (table.getColumn("name")?.getFilterValue() as string) ?? ""
+              }
+              onChange={(event: any) =>
+                table.getColumn("name")?.setFilterValue(event.target.value)
+              }
+              className="max-w-sm"
+            />
+          </div>
+        </div>
+
+        <div className="flex items-center">
+          <DataTableViewOptions table={table} />
+          <Button className="ml-4" onClick={handleDrawerOpen}>
+            Add New
+          </Button>
+        </div>
+      </div>
+
+      <Table className="border-2 rounded-lg">
+        <TableHeader className="bg-slate-300">
+          {table.getHeaderGroups().map((headerGroup: any) => (
+            <TableRow key={headerGroup.id}>
+              {headerGroup.headers.map((header: any) => (
+                <TableHead key={header.id} className="text-white font-bold p-2">
+                  {header.isPlaceholder
+                    ? null
+                    : flexRender(
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
+                </TableHead>
+              ))}
+            </TableRow>
+          ))}
+        </TableHeader>
+        <TableBody className="border-2 border-slate-300">
+          {table.getRowModel().rows.length > 0 ? (
+            table.getRowModel().rows.map((row: any) => (
+              <TableRow key={row.id}>
+                {row.getVisibleCells().map((cell: any) => (
+                  <TableCell key={cell.id}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell colSpan={columns.length} className="h-24 text-center">
+                No results.
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+
+      <DataTablePagination table={table} />
+
+      <Drawer width="100" isOpen={isOpen} onClose={onDismiss}>
+        {children}
+      </Drawer>
+    </div>
+  );
+}
