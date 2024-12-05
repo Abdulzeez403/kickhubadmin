@@ -1,99 +1,67 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Formik, Form, Field } from "formik";
-import { supabase } from "@/lib/supabaseClient";
-import { useAuth } from "@/app/context";
+import { useDispatch } from "react-redux";
+import { Button, UploadProps } from "antd";
+import { createProduct, updateProduct } from "@/app/reduxs/product/products";
+import { AppDispatch } from "@/app/reduxs/store";
+import Image from "next/image";
+import { Files } from "@/app/(components)/inputs/uploadFile";
 
-interface ProductFormValues {
-  name: string;
-  description: string;
-  price: string;
-  oldPrice: string;
-  discount: string;
-  images: File[];
-}
+const ProductForm = (product: any, selectedProductId: string) => {
+  const dispatch = useDispatch<AppDispatch>();
+  const [files, setFiles] = useState([]);
 
-const ProductForm = () => {
-  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
-  const [loading, setLoading] = useState(false);
-  const { user } = useAuth(); // Get the authenticated user from context
+  const item = product.product;
 
-  const initialValues: ProductFormValues = {
-    name: "",
-    description: "",
-    price: "",
-    oldPrice: "",
-    discount: "",
-    images: [],
+  const initialValues = {
+    name: item?.name || "",
+    description: item?.description || "",
+    price: item?.price || 0,
+    category: item?.category || "",
+    tag: item?.tag || "",
+    stock: item?.stock || 0,
   };
 
-  const handleFileChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    setFieldValue: (field: string, value: File[]) => void
-  ) => {
-    const files = e.target.files ? Array.from(e.target.files) : [];
-    setFieldValue("images", files);
-    const previews = files.map((file) => URL.createObjectURL(file));
-    setImagePreviews(previews);
+  const handleProductImage: UploadProps["onChange"] = ({ fileList }: any) => {
+    setFiles(fileList);
   };
 
-  const uploadImages = async (files: File[]): Promise<string[]> => {
-    const uploadedUrls: string[] = [];
-    for (const file of files) {
-      const fileName = `${Date.now()}-${file.name}`;
-      const { error: uploadError } = await supabase.storage
-        .from("productImages")
-        .upload(fileName, file);
-
-      if (uploadError) throw uploadError;
-
-      const {
-        data: { publicUrl },
-      } = supabase.storage.from("productImages").getPublicUrl(fileName);
-
-      uploadedUrls.push(publicUrl);
-    }
-    return uploadedUrls;
-  };
-
-  const handleSubmit = async (values: ProductFormValues) => {
-    if (!user) {
-      console.error("User is not authenticated. Redirecting to login...");
-      return; // Handle redirect or error
-    }
-
+  const handleSubmit = async (values: any) => {
     try {
-      setLoading(true);
-      const imageUrls = await uploadImages(values.images);
+      const productData = {
+        ...values,
+        images: files
+          ?.map((f: any) => ({
+            uri: f?.thumbUrl || f?.url,
+            type: f?.type,
+            name: f?.name,
+          }))
+          .filter((file) => file.uri),
+      };
 
-      // Insert product data into Supabase
-      const { data, error } = await supabase
-        .from("products")
-        .insert([
-          {
-            name: values.name,
-            description: values.description,
-            price: values.price,
-            oldPrice: values.oldPrice,
-            discount: values.discount,
-            images: imageUrls, // Save image URLs in the array
-          },
-        ])
-        .select(); // Select the inserted row data if needed
+      if (selectedProductId) {
+        await dispatch(
+          updateProduct({ productId: selectedProductId, ...productData })
+        );
+        console.log("updating product");
+      } else {
+        await dispatch(createProduct(productData));
+      }
 
-      if (error) throw error;
-
-      console.log("Product added successfully", data);
+      console.log("Product added or updated successfully");
     } catch (error) {
-      console.error("Error adding product:", error);
-    } finally {
-      setLoading(false);
+      console.error("Error adding or updating product:", error);
     }
   };
 
   return (
-    <Formik initialValues={initialValues} onSubmit={handleSubmit}>
+    <Formik
+      key={selectedProductId}
+      initialValues={initialValues}
+      onSubmit={handleSubmit}
+    >
       {({ setFieldValue }) => (
         <Form className="space-y-4">
           <div>
@@ -106,7 +74,6 @@ const ProductForm = () => {
               required
             />
           </div>
-
           <div>
             <label htmlFor="description">Description</label>
             <Field
@@ -114,71 +81,71 @@ const ProductForm = () => {
               as="textarea"
               className="border p-2 w-full"
               placeholder="Enter product description"
-              required
             />
           </div>
-
           <div>
             <label htmlFor="price">Price</label>
             <Field
               name="price"
-              type="text"
+              type="number"
               className="border p-2 w-full"
               placeholder="Enter price"
               required
             />
           </div>
-
           <div>
-            <label htmlFor="oldPrice">Old Price</label>
+            <label htmlFor="category">Category</label>
             <Field
-              name="oldPrice"
+              name="category"
               type="text"
               className="border p-2 w-full"
-              placeholder="Enter old price"
+              placeholder="Enter category"
+              required
             />
           </div>
-
           <div>
-            <label htmlFor="discount">Discount</label>
+            <label htmlFor="tag">Tag</label>
             <Field
-              name="discount"
+              name="tag"
               type="text"
               className="border p-2 w-full"
-              placeholder="Enter discount"
+              placeholder="Enter tag"
+              required
+            />
+          </div>
+          <div>
+            <label htmlFor="stock">Stock</label>
+            <Field
+              name="stock"
+              type="number"
+              className="border p-2 w-full"
+              placeholder="Enter stock"
+              required
+            />
+          </div>
+
+          <div className="my-4">
+            <Files
+              fileList={files} // Pass files as fileList
+              handleChange={handleProductImage} // Corrected to use handleProductImage
             />
           </div>
 
           <div>
-            <label htmlFor="images">Upload Images</label>
-            <input
-              name="images"
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={(e) => handleFileChange(e, setFieldValue)}
-              className="border p-2 w-full"
-            />
-
-            <div className="flex space-x-2 mt-4">
-              {imagePreviews.map((src, idx) => (
-                <img
-                  key={idx}
-                  src={src}
-                  alt={`preview-${idx}`}
-                  className="w-24 h-24 object-cover"
-                />
-              ))}
-            </div>
+            {item?.images?.map((img: any, index: number) => (
+              <div key={index}>
+                <Image src={img.uri} width={100} height={40} alt="Product" />
+              </div>
+            ))}
           </div>
 
-          <button
-            type="submit"
+          <Button
+            type="primary"
+            htmlType="submit"
             className="bg-blue-500 text-white px-4 py-2 rounded"
-            disabled={loading}
           >
-            {loading ? "Submitting..." : "Submit Product"}
-          </button>
+            Submit Product
+          </Button>
         </Form>
       )}
     </Formik>

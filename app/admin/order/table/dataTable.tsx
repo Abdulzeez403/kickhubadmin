@@ -36,7 +36,6 @@ interface DataTableProps<TData, TValue> {
   children: React.ReactNode;
   isOpen: boolean;
   handleDrawerOpen: () => void;
-  id?: string;
 }
 
 export function TableComponent<TData, TValue>({
@@ -46,7 +45,6 @@ export function TableComponent<TData, TValue>({
   isOpen,
   onDismiss,
   handleDrawerOpen,
-  id,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -138,7 +136,7 @@ export function TableComponent<TData, TValue>({
 
       <DataTablePagination table={table} />
 
-      <Drawer width="100" isOpen={isOpen} onClose={onDismiss} id={id}>
+      <Drawer width="100" isOpen={isOpen} onClose={onDismiss}>
         {children}
       </Drawer>
     </div>

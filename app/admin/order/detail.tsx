@@ -1,56 +1,37 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import ProductForm from "./form";
 import { columns } from "./column";
 import { TableComponent } from "./table/dataTable";
-import {
-  deleteProduct,
-  fetchProductById,
-  fetchProducts,
-} from "@/app/reduxs/product/products";
+import { fetchProducts } from "@/app/reduxs/product/products";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/app/reduxs/store";
 
-export const ProductDetail = () => {
+export const OrderDetail = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const dispatch = useDispatch<AppDispatch>();
-  const [selectedProductId, setSelectedProductId] = useState<string | null>(
-    null
-  );
 
   const {
     loading,
     error,
+    product, // Use single product here for specific product view
     items, // Use items for all products
-    product,
   } = useSelector((state: RootState) => state.products);
 
   useEffect(() => {
     dispatch(fetchProducts());
+    console.log("Single product:", product);
+    console.log("All products:", items);
   }, []);
 
-  const handleUpdate = (value: any) => {
-    const productId = value?._id; // Retrieve the product ID from the selected value
-    setSelectedProductId(productId);
-    setIsDrawerOpen(true);
-
-    if (selectedProductId) {
-      dispatch(fetchProductById(selectedProductId))
-        .unwrap()
-        .then(() => {
-          console.log("Product data fetched successfully");
-        })
-        .catch((error) => {
-          console.error("Error fetching product data:", error);
-        });
-    } else {
-      console.error("No product ID available");
-    }
+  // Handlers for Drawer and actions
+  const handleUpdate = () => {
+    setIsDrawerOpen(true); // Open drawer for update
   };
 
-  const handleDelete = (value: any) => {
-    dispatch(deleteProduct(value?._id));
+  const handleDelete = () => {
+    alert("Deleted Successfully!");
+    // Implement deletion logic here if necessary
   };
 
   const handleView = (value: any) => {
@@ -62,7 +43,6 @@ export const ProductDetail = () => {
   };
 
   const handleDrawerOpen = () => {
-    setSelectedProductId(null);
     setIsDrawerOpen(true); // Open drawer for new product
   };
 
@@ -83,7 +63,7 @@ export const ProductDetail = () => {
         ) : items && items.length > 0 ? (
           <TableComponent
             columns={createColumns}
-            data={items}
+            data={items} // Use items to display all products
             onEdit={handleUpdate}
             onDelete={handleDelete}
             onView={handleView}
@@ -91,13 +71,10 @@ export const ProductDetail = () => {
             isOpen={isDrawerOpen}
             handleDrawerOpen={handleDrawerOpen}
           >
-            <ProductForm
-              product={product}
-              selectedProductId={selectedProductId}
-            />
+            <h3>This is it</h3>
           </TableComponent>
         ) : (
-          <p>No products available.</p>
+          <p>No Order available.</p>
         )}
       </div>
     </div>

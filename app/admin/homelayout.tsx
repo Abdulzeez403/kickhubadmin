@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   LayoutDashboard,
@@ -17,9 +17,11 @@ import Image from "next/image";
 
 import { usePathname } from "next/navigation";
 import Drawer from "../(components)/modals/drawer";
-import { useAuth } from "../context";
 import { useRouter } from "next/navigation";
 import Logo from "../../public/logo.jpeg";
+import { useSelector } from "react-redux";
+import { RootState } from "../reduxs/store";
+import { logout } from "../reduxs/auth/auth";
 
 interface IProp {
   children: React.ReactNode;
@@ -33,14 +35,18 @@ interface NavLinkProps {
 
 export const MainLayout = ({ children }: IProp) => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const { signOut } = useAuth();
   const router = useRouter();
 
+  const isLoggedIn = useSelector((state: RootState) => !!state.auth.user);
+
   const SignOut = async () => {
-    await signOut().then(() => {
-      router.push("/auth");
-    });
+    await logout();
+    router.push("/auth");
   };
+
+  // useEffect(() => {
+  //   isLoggedIn && router.push("/auth");
+  // }, []);
 
   const urlPath = usePathname();
   const NavLink = ({ href, icon: Icon, children }: NavLinkProps) => {
@@ -49,13 +55,11 @@ export const MainLayout = ({ children }: IProp) => {
     return (
       <Link
         href={href}
-        className={`mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2  hover:text-foreground ${
-          isActive ? "bg-slate-300 text-white" : ""
+        className={`mx-[-0.65rem] flex items-center gap-4 rounded-xl rounded-t-r-none px-3 py-2  hover:text-foreground ${
+          isActive ? "bg-black text-white rounded-b-none" : ""
         }`}
       >
-        {Icon && <Icon className="h-5 w-5" />}{" "}
-        {/* Render the icon if provided */}
-        {children}
+        {Icon && <Icon className="h-5 w-5" />} {children}
       </Link>
     );
   };
@@ -95,11 +99,8 @@ export const MainLayout = ({ children }: IProp) => {
           <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6 bg-customPrimary">
             <Link href="/" className="flex items-center gap-2 font-semibold">
               <div className="flex gap-4 items-center">
-                <div className="">
-                  <Image src={Logo} alt="logo" width={30} height={30} />
-                </div>
                 <div>
-                  <h4 className="text-customSecondary">Cycle Surgeon</h4>
+                  <h4 className="text-lg">KickHub</h4>
                 </div>
               </div>
             </Link>
@@ -127,7 +128,7 @@ export const MainLayout = ({ children }: IProp) => {
           </button>
         </header>
 
-        <main className="p-4 overflow-y-auto  flex-1">{children}</main>
+        <main className="p-4 overflow-y-auto flex-1">{children}</main>
       </div>
 
       <Drawer isOpen={isDrawerOpen} onClose={() => setIsDrawerOpen(false)}>

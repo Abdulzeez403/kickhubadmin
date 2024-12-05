@@ -7,6 +7,7 @@ interface DrawerProps {
   onClose: () => void;
   children: ReactNode;
   width?: string; // Width of the drawer (e.g., "w-64", "w-80")
+  id?: string;
 }
 
 const Drawer: React.FC<DrawerProps> = ({
@@ -14,6 +15,7 @@ const Drawer: React.FC<DrawerProps> = ({
   onClose,
   children,
   width = "w-80",
+  id,
 }) => {
   return (
     <>

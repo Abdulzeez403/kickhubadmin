@@ -1,6 +1,5 @@
 import "../globals.css";
 import { MainLayout } from "./homelayout";
-import { ProductsProvider } from "./product/context";
 
 // const geistSans = localFont({
 //   src: "../fonts/GeistMonoVF.woff",
@@ -26,9 +25,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <ProductsProvider>
-          <MainLayout>{children}</MainLayout>
-        </ProductsProvider>
+        <MainLayout>{children}</MainLayout>
       </body>
     </html>
   );

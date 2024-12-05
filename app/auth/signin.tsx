@@ -1,9 +1,18 @@
 "use client";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import { useAuth } from "../context";
+import { AppDispatch, RootState } from "../reduxs/store";
+import { login } from "../reduxs/auth/auth";
+import { useDispatch, useSelector } from "react-redux";
+import { useRouter } from "next/navigation";
+
 const LoginForm = () => {
-  const { signIn, loading } = useAuth();
+  const dispatch = useDispatch<AppDispatch>();
+  const route = useRouter();
+
+  const { loading, error, user } = useSelector(
+    (state: RootState) => state.auth
+  );
 
   const initialValues = {
     email: "",
@@ -17,8 +26,13 @@ const LoginForm = () => {
       .required("Required"),
   });
 
-  const handleLogin = async (values: typeof initialValues) => {
-    await signIn(values.email, values.password);
+  const handleSignIn = async (values: typeof initialValues) => {
+    try {
+      await dispatch(login(values)).unwrap(); // Await the async thunk to handle errors here
+      route.push("/admin");
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
@@ -27,7 +41,7 @@ const LoginForm = () => {
       <Formik
         initialValues={initialValues}
         validationSchema={validationSchema}
-        onSubmit={handleLogin}
+        onSubmit={handleSignIn}
       >
         <Form className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
           <div className="mb-4">
